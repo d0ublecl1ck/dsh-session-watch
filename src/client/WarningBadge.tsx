@@ -10,6 +10,7 @@
  * @module dsh-unarchived-watch/client/WarningBadge
  */
 import { useSyncExternalStore } from 'react'
+import { Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import { countUnarchived, shouldWarn } from '../count.js'
 import { WarningIcon } from './WarningIcon.js'
 import type { SnapshotSelectorHook, Translate } from './types.js'
@@ -44,8 +45,13 @@ export function WarningBadge({ useSessions, useWorkspaces, threshold, t }: Warni
   if (!shouldWarn(count, limit)) return null
   const label = t('badge.aria', { count, threshold: limit })
   return (
-    <span className="uw-badge" role="status" aria-label={label} title={label} data-unarchived-count={count}>
-      <WarningIcon />
-    </span>
+    // The shell's own tooltip, portaled out of the sidebar's clipping column so
+    // the bubble is never cut off at the foot of the rail. Hover and keyboard
+    // focus both raise it; the anchor keeps its own accessible name.
+    <Tooltip label={label} side="top" delayMs={200} portal>
+      <span className="uw-badge" role="status" aria-label={label} data-unarchived-count={count}>
+        <WarningIcon />
+      </span>
+    </Tooltip>
   )
 }

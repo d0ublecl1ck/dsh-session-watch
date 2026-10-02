@@ -12,7 +12,8 @@ DSH Web 插件：未归档会话数超过阈值时，在侧边栏底部显示警
 ## 技术栈
 
 - TypeScript（两个 tsconfig）+ esbuild；客户端产物是浏览器模块（`window.__ModuleLoader__.load`）。
-- 依赖极简：运行时只额外依赖 `@deepseek-ai/schemastery`（host 半边声明 Config 用），其余 official 形状都用 `src/client/types.ts` 里的结构化类型描述，避免 `link:` 安装的裸导入决议问题。
+- 依赖极简：host 半边只额外依赖 `@deepseek-ai/schemastery`（声明 Config 用）；客户端只从 shell 的 platform seed 里取 `react` 与 `@deepseek-ai/dsh-client-ui-primitives`（Tooltip），其余 official 形状都用 `src/client/types.ts` 里的结构化类型描述，避免 `link:` 安装的裸导入决议问题。
+- platform seed 的词表（react / react-dom / cordis / dsh-client-store / dsh-client-ui-slots / dsh-client-ui-primitives / dsh-client-ui-dockkit）由 shadow shell 注入，见 `dsh-web-frontend/dist/assets/index-*.js` 里的 `staticModules`；引入新的 seed 外模块前先核对这张表。
 - 测试：`node --test` + `react-dom/server`；`test/harness.mjs` 负责把真实 `lib/client.js` 挂到假 client context 上。
 
 ## 当前状态与下一步

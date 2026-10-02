@@ -15,6 +15,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import vm from 'node:vm'
+import { createElement } from 'react'
 
 export const root = dirname(dirname(fileURLToPath(import.meta.url)))
 export const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
@@ -69,10 +70,24 @@ export function loadClientModule() {
   return { captured, sandbox }
 }
 
-/** Run the factory with a real react and return the module's exports. */
+/**
+ * Stand-ins for the Web shell's platform module table. The shell serves the
+ * real modules in the browser; the tests only need the shapes the bundle calls,
+ * so the tooltip stand-in echoes the label it was handed into the markup.
+ */
+const PLATFORM_MODULES = {
+  '@deepseek-ai/dsh-client-ui-primitives': {
+    Tooltip: ({ label, children }) =>
+      createElement('span', { 'data-tooltip': typeof label === 'function' ? label() : label }, children),
+  },
+}
+
+/** Run the factory with a real react (plus the platform stand-ins). */
 export function instantiate(captured) {
   const require = createRequire(join(root, 'lib', 'noop.js'))
-  return captured.factory(require)
+  return captured.factory((specifier) =>
+    Object.hasOwn(PLATFORM_MODULES, specifier) ? PLATFORM_MODULES[specifier] : require(specifier),
+  )
 }
 
 /** Load the artifact and instantiate it, keeping the sandbox for globals. */
