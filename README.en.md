@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![no archive writes](https://img.shields.io/badge/session%20or%20archive%20writes-none-brightgreen)
 
-**A dashboard light for unarchived-session backlog: it lights up when you cross the threshold and opens a read-only list grouped by workspace. It never archives, deletes, or persists anything.**
+**A dashboard light for unarchived-session backlog: it lights up when you cross the threshold. It never archives, deletes, or persists anything.**
 
 [Why](#why) · [Measured example](#measured-example) · [Quick start](#quick-start) · [Safety](#safety) · [Files](#files) · [Verification](#verification)
 
@@ -24,7 +24,7 @@ Archiving in DSH is a **manual** action, and nothing reminds you that it is time
 
 So it always happens the same way: a few weeks of opening new sessions, then one day the sidebar takes forever to scroll, and you spend half an hour hunting, archiving, and wishing you had kept up.
 
-This plugin turns "time to clean up" into a **passive signal**: once unarchived ordinary sessions pass your threshold (10 by default), a yellow warning triangle appears at the sidebar foot with the current count as a badge. The Settings page carries the full board: how many, in which workspace, and how long each has been idle.
+This plugin turns "time to clean up" into a **passive signal**: once unarchived ordinary sessions pass your threshold (10 by default), a yellow warning triangle appears at the sidebar foot with the current count as a badge; the Settings threshold row carries the same count.
 
 **It tells you; it does not act for you.** Archiving stays in the sidebar's own row actions — the plugin takes over no state at all.
 
@@ -75,33 +75,31 @@ The threshold also lives in the profile's `cordis.patch.yml` — note that **the
 | Sidebar foot | yellow warning triangle + count badge | unarchived ordinary sessions **strictly greater than** the threshold |
 | Hover / keyboard focus | tooltip: `{count} unarchived sessions, above the threshold of {threshold}` | while the icon is visible |
 | Settings → General | "Unarchived session warning" row: input + current count | while the Host serves this plugin's config |
-| Settings → Unarchived sessions | full board: total / threshold / state + list grouped by workspace | same |
 
 ## Safety
 
 - **No session or archive state writes**: no `archiveSession`, `unarchiveSession`, or delete call anywhere. The plugin's only write is the threshold you change yourself — it goes through the Host settings transport into the profile's `cordis.patch.yml`, which is configuration, not session state.
 - **No network**: the client only reads snapshots the shell already publishes (`useSessions` / `useWorkspaces`).
 - **No persistence**: no files, no `localStorage` keys, no storage domain of its own.
-- **No silent miscount**: the badge and the board share one implementation in `src/count.ts`, with a unit test pinning them equal; the counting scope is printed on the board itself.
+- **No silent miscount**: the badge and the Settings row share one implementation in `src/count.ts`, with the counting scope pinned by unit tests.
 - **Stops instead of guessing**: when the Host serves no config namespace for this plugin, the row and the board are not registered (the icon still works with the default threshold).
 
 ## Files
 
 ```text
 src/index.ts                    host half: name / Config / apply only (threshold is volatile)
-src/count.ts                    pure counting + grouping + age buckets
-src/client/index.ts             browser half: registers badge, settings row, settings page
+src/count.ts                    pure counting scope
+src/client/index.ts             browser half: registers badge and the settings row
 src/client/WarningBadge.tsx     sidebar-foot icon + count badge + the shell's Tooltip
 src/client/ThresholdRow.tsx     threshold input row
-src/client/UnarchivedSection.tsx the settings page board
 scripts/check-release.mjs       offline release check (manifest, contracts, externals, freshness)
-test/                           33 node:test cases (scope, module contract, SSR renders)
+test/                           22 node:test cases (scope, module contract, SSR renders)
 ```
 
 ## Verification
 
 ```sh
-npm run verify        # typecheck + build + 33 tests + check-release
+npm run verify        # typecheck + build + 22 tests + check-release
 ```
 
 `npm run check-release` blocks the four release accidents this project has hit or could hit: a stale `lib/` after editing `src/`, an `export default` that folds away `inject`, a browser bundle requiring a module outside the shell's platform seed, and a tarball that would drop `cordis.patch.yml`.

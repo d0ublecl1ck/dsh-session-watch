@@ -1,18 +1,17 @@
 {
   "package": "dsh-unarchived-watch",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "sources": {
     "src/client/ThresholdRow.tsx": "68030c2f7962eb5a2d6a2cc7012b8f50e9ea6b40d0caed17d1dae0b988542dd4",
-    "src/client/UnarchivedSection.tsx": "47acbfa1453996c00648e5868dd7e54f8bdb714ff04408c979f8d3786c598c07",
     "src/client/WarningBadge.tsx": "92474f0c9f55f83a1e29ea97105ed4903865eb9b3692af9395acbd9207848744",
     "src/client/WarningIcon.tsx": "8e3d2d05dfc661c85855ac548964b3d30049c27ab43b9ab389f2a1b28c0062b0",
-    "src/client/index.ts": "3d75abfc7ce2401423eb10c4141b7c0cf9a0ca27da9d5867f46b30fe3b09d639",
-    "src/client/locales.ts": "ef94600ea86881742e9f9636ec96ba39ca0420d0fc6b0a7360b9f3cd9bc8527d",
+    "src/client/index.ts": "5aa9d9c637bff4c20316df6c87f6544ebff02a4904cb20534b1712476ecd84ca",
+    "src/client/locales.ts": "938a42cafcf3182305d4322193804fc4622fac320db5d8cc2c73bcca2067e7e8",
     "src/client/platform.d.ts": "23cd01c7c31347fc8e6b84add00d5e0f51b8a298b5680dff6b14b090eb7ea426",
-    "src/client/styles.ts": "ec847c2d7297deca6991a0879f983ed984af6c028ec216e8edb934bcf1230277",
+    "src/client/styles.ts": "cb85967a2e8c15fcb55cbed0cae979341d960d2af9fe08d75e14b37b8dcd3587",
     "src/client/threshold.ts": "ddc00be0f043357c2cfe1015dfdf487c3ee69a740ec0e520297dbdd36d60ee84",
     "src/client/types.ts": "c9fb17c1eae49a409179cf137c6b7261b99e574052e3d3a9c0ad4ba986fef7e0",
-    "src/count.ts": "9388046edc4b6176be0c9258a05b01dc5b22770baa8877ab75a3f28f704dae7a",
+    "src/count.ts": "6bb55c6e2396ca33d6609fd0e233e3db6c0dd3aabb5da6f331b7a731d34dd0b0",
     "src/index.ts": "a106b710c82e2935ade0935d3fe0ae2a7b3c73e133863e520f21363321105c79",
     "scripts/build.mjs": "831d6c918acc668df0e3e3c7b7f81c0e5cf90159587f8b82fea5a0f8c9c53564"
   }

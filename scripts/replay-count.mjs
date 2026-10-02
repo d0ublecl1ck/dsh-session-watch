@@ -4,9 +4,9 @@
  *
  * Offline and read-only: it takes two files that already exist on any machine
  * running DSH — the `session/list` result and `<DSH home>/storages/workspace.json`
- * — and prints exactly what the sidebar badge and the Settings board would show.
- * That is how the numbers in README.md were produced, and how anyone can
- * reproduce them against their own instance.
+ * — and prints exactly what the sidebar badge would show. That is how the
+ * numbers in README.md were produced, and how anyone can reproduce them
+ * against their own instance.
  *
  * Usage:
  *   node scripts/replay-count.mjs --sessions <file> --workspace <workspace.json> [--threshold <n>]
@@ -37,13 +37,12 @@ for (const path of [sessionsPath, workspacePath]) {
   }
 }
 
-const { collectUnarchived, countUnarchived, groupUnarchived, normalizeThreshold, shouldWarn } = await import(HERE.href)
+const { countUnarchived, normalizeThreshold, shouldWarn } = await import(HERE.href)
 
 const listed = JSON.parse(readFileSync(sessionsPath, 'utf8'))
 const items = Array.isArray(listed) ? listed : (listed.items ?? [])
 const registry = JSON.parse(readFileSync(workspacePath, 'utf8'))
 const global = registry.global ?? {}
-const table = registry.tables?.workspaces ?? {}
 const archived = global.archivedSessionIds ?? []
 
 const ids = []
@@ -55,25 +54,11 @@ for (const item of items) {
     blank: item.blank,
     parentId: item.parentSessionId ?? item.parentId,
     origin: item.origin,
-    displayTitle: item.projections?.values?.title ?? item.title,
-    cwd: item.cwd,
-    updatedAt: item.updatedAt,
-    running: item.running,
   }
 }
 
 const state = { ids, byId }
-const rows = collectUnarchived(state, archived)
 const count = countUnarchived(state, archived)
-const workspaces = {
-  items: (global.workspaceIds ?? []).map((workspaceId) => ({
-    workspaceId,
-    title: table[workspaceId]?.title,
-    path: table[workspaceId]?.path,
-    sessionIds: table[workspaceId]?.sessionIds ?? [],
-  })),
-}
-const groups = groupUnarchived(rows, workspaces)
 const threshold = normalizeThreshold(thresholdArg)
 
 process.stdout.write('sessions rows        ' + ids.length + '\n')
@@ -81,11 +66,3 @@ process.stdout.write('archived ids         ' + archived.length + '\n')
 process.stdout.write('unarchived ordinary  ' + count + '\n')
 process.stdout.write('threshold            ' + threshold + '\n')
 process.stdout.write('sidebar light        ' + (shouldWarn(count, threshold) ? 'on' : 'off') + '\n')
-process.stdout.write('groups               ' + groups.length + '\n')
-for (const group of groups) {
-  process.stdout.write('  ' + String(group.rows.length).padStart(3) + '  ' + (group.label === '' ? '(no workspace)' : group.label) + '\n')
-}
-if (rows.length !== count) {
-  process.stderr.write('INCONSISTENT: the board has ' + rows.length + ' rows but the badge counts ' + count + '\n')
-  process.exit(1)
-}

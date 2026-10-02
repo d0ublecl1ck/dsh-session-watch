@@ -6,14 +6,15 @@
 - [ ] `awesome-dsh-plugin/awesome-dsh-plugin` 的 `data/plugins/<owner>__<repo>.yml`（字段 `url/name/category/description.en`，`description.zh` 可选）—— 我们还没投稿；3★ 也能收录，说明门槛是"提交一个 yml"而不是热度。记录：2026-10-02
 
 ## 未验证 / 可能漂移
-- [ ] `src/client/WarningBadge.tsx` + `src/client/UnarchivedSection.tsx` — 依赖框架的 standard props `useSessions` / `useWorkspaces`，但本仓库只用结构化类型描述它们，没有对 official 包做类型校验；改名或字段语义变化不会编译报错，只会静默失效。下次核对 `GlobalStandardProps`、`SessionListState`、`WorkspaceSnapshot`。记录：2026-10-02
+- [ ] `src/client/WarningBadge.tsx` — 依赖框架的 standard props `useSessions` / `useWorkspaces`，但本仓库只用结构化类型描述它们，没有对 official 包做类型校验；改名或字段语义变化不会编译报错，只会静默失效。下次核对 `GlobalStandardProps`、`SessionListState`、`WorkspaceSnapshot`。记录：2026-10-02
 - [ ] 徽标数量角标 — `.uw-badge-count` 绝对定位在 28px 图标右上角，侧边栏收成 56px rail 时可能被 `footerActions` 的 `overflow: hidden` 裁掉；**尚未在 rail 形态下人眼确认**。下次刷新页面时把侧边栏折起来看一眼。记录：2026-10-02
-- [ ] `src/client/index.ts` — `settings.section` 的 `label` 用 `() => t('section.nav')`（依赖 `ctx.locale.bind` 每次调用读当前语言）；`settings.general.item` 的 owner 不投影 label，行内布局自绘。下次核对 locale 切换后导航文案是否跟着变、以及 Dialog 尺寸变化后排版。记录：2026-10-02
-- [ ] `src/count.ts` — 计数与分组读 `SessionListState.ids`/`byId` 与 `WorkspaceSnapshot.archivedSessionIds/items`；字段改名或 `origin`/`blank` 语义变化会导致计数静默变成 0 或偏大。下次核对这两个快照的实际字段。记录：2026-10-02
-- [ ] 浏览器端最终挂载 — 单测只覆盖到"组件渲染出什么"，slot 真实挂载与样式需要刷新页面确认；页面里看不到图标时先看 `document.head` 里有没有 `<style data-plugin="dsh-unarchived-watch">`。记录：2026-10-02
+- [ ] `src/count.ts` — 计数读 `SessionListState.ids`/`byId` 与 `WorkspaceSnapshot.archivedSessionIds`；字段改名或 `origin`/`blank` 语义变化会导致计数静默变成 0 或偏大。下次核对这两个快照的实际字段。记录：2026-10-02
+- [ ] 浏览器端最终挂载 — 单测只覆盖到"组件渲染出什么"，slot 真实挂载与样式需要刷新页面确认；页面里看不到图标时先看 `document.head` 里有没有 `<style data-plugin="dsh-unarchived-watch">`。0.3.0 移除看板后，还应确认设置页左侧导航不再出现「未归档会话」入口。记录：2026-10-02
 - [ ] `package.json` — devDependencies 里的 `@types/react`、`react-dom`、`typescript` 与运行实例的 React 版本解耦；升级实例大版本时重新跑 `npm run verify`。记录：2026-10-02
+- [ ] `package.json dsh.client.inject` — 0.3.0 事故后保留了 `@deepseek-ai/dsh-client-ui-settings`（即使看板已删）：它是否真被 `settings.general.item` 的声明链需要，**未单独验证**；下次想裁剪名单时先在实例里 remove+add 后人眼确认设置行仍在。记录：2026-10-02
+- [ ] 客户端产物变更的生效路径 — `dsh-client-modules` 的组合图只在 fiber 生命周期（plugin add/remove/update）或 HMR dev watcher 时重建；**改 `lib/` 后只刷新页面，旧 rev URL 会按 immutable 策略被拒，整个客户端模块（含侧边栏徽标）一起消失**。改完产物必须对目标实例执行 `dsh plugin --profile web remove dsh-unarchived-watch && dsh plugin --profile web add <本目录>`（DSH_HOME 指向实例 home）。记录：2026-10-02
 
 ## 下一轮入口（本轮明确不做）
 - [ ] 一键归档入口（接 `uiWorkspace.archiveSession`，要处理"会话有运行中工作会被拒"的报错）—— 属状态写操作，需用户单独授权。
-- [ ] 首屏截图/GIF + 录制脚本入库（本轮用户未选）。
+- [ ] 首屏截图/GIF + 录制脚本入库（0.3.0 后首屏只剩侧边栏徽标 + 设置行两张图）。
 - [ ] 投稿 awesome-dsh-plugin；加 CI（目前无 `.github/`，所以"绿"只能靠本地 `npm run verify`）。

@@ -1,6 +1,6 @@
 {
   "name": "dsh-unarchived-watch",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "DSH Web 插件：未归档会话数超过阈值时，在侧边栏底部显示警告图标；阈值在设置页配置。",
   "type": "module",
   "license": "MIT",

@@ -2,6 +2,20 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的分节习惯，版本号遵循语义化版本。
 
+## 0.3.0 — 2026-10-02
+
+### 移除
+- **设置页整页看板**：`Settings → 未归档会话` 页不再注册。设置页里本插件只剩通用栏的阈值配置行；未归档会话的明细继续由官方侧边栏自己呈现。
+
+### 变更
+- 客户端不再注册 `settings.section`，`UnarchivedSection` 组件及其 `section.*` 文案与样式随之删除；`dsh.client.inject` 名单去掉不再需要的 `@deepseek-ai/dsh-client-ui-settings`。
+- `src/count.ts` 回归纯计数：`collectUnarchived` / `groupUnarchived` / `describeAge` 只被看板使用，一并移除；徽标与阈值行仍共用 `countUnarchived` 的口径，计数逻辑未变。
+- `scripts/replay-count.mjs` 不再输出分组，只报总数、阈值与亮灯判定。
+- 单测从 33 个收敛到 22 个：删除看板专属的 `test/board.test.mjs` 与 `test/section-render.test.mjs`，契约测试改为断言 `settings.section` 不注册。
+
+### 说明
+- 为什么移除：设置页只需要「允许设阈值」；逐条列出全部未归档会话属于越界展示，要看明细时官方侧边栏本来就是权威清单。
+
 ## 0.2.0 — 2026-10-02
 
 ### 新增

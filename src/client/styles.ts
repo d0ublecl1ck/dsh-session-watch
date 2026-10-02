@@ -1,8 +1,8 @@
 /**
- * Injected page styles for the warning badge and the Unarchived sessions
- * settings page. One `<style data-plugin>` element owns every `uw-` class and
- * the client fiber removes it on dispose; colors come from the shell's own
- * tokens so both surfaces follow the active theme.
+ * Injected page styles for the warning badge and the Settings threshold row.
+ * One <style data-plugin> element owns every `uw-` class and the client
+ * fiber removes it on dispose; colors come from the shell's own tokens so
+ * both surfaces follow the active theme.
  *
  * @module dsh-unarchived-watch/client/styles
  */
@@ -108,131 +108,6 @@ const CSS = `
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-/* The Settings page: summary on top, one block per Workspace below. */
-.uw-section {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 4px 0 24px;
-}
-
-.uw-section-head {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.uw-section-title {
-  font-size: 15px;
-  line-height: 22px;
-  font-weight: 600;
-  color: var(--dsw-alias-label-primary, inherit);
-}
-
-.uw-section-summary {
-  font-size: 13px;
-  line-height: 20px;
-  color: var(--dsw-alias-label-secondary, inherit);
-}
-
-.uw-section-state {
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-state-warn-primary, #f59e0b);
-}
-
-.uw-section-state-under { color: var(--dsw-alias-label-tertiary, GrayText); }
-
-.uw-section-rule,
-.uw-section-empty {
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-tertiary, GrayText);
-}
-
-.uw-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.uw-group-head {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 4px 0 2px;
-}
-
-.uw-group-title {
-  font-size: 13px;
-  line-height: 18px;
-  font-weight: 600;
-  color: var(--dsw-alias-label-primary, inherit);
-}
-
-.uw-group-path {
-  min-width: 0;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-tertiary, GrayText);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.uw-group-count {
-  margin-inline-start: auto;
-  flex: none;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-tertiary, GrayText);
-  font-variant-numeric: tabular-nums;
-}
-
-.uw-group-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.uw-item {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: var(--dsw-alias-bg-layer-2, transparent);
-}
-
-.uw-item-title {
-  flex: 1;
-  min-width: 0;
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-primary, inherit);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.uw-item-running {
-  flex: none;
-  font-size: 11px;
-  line-height: 18px;
-  color: var(--dsw-alias-state-success-primary, #2ea043);
-}
-
-.uw-item-meta {
-  flex: none;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--dsw-alias-label-tertiary, GrayText);
-  font-variant-numeric: tabular-nums;
 }
 `
 
