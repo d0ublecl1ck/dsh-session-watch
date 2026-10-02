@@ -1,6 +1,6 @@
 {
   "name": "dsh-unarchived-watch",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "DSH Web 插件：未归档会话数超过阈值时，在侧边栏底部显示警告图标；阈值在设置页配置。",
   "type": "module",
   "license": "MIT",
@@ -21,6 +21,8 @@
     "lib",
     "cordis.patch.yml",
     "README.md",
+    "README.en.md",
+    "CHANGELOG.md",
     "AGENTS.md",
     "LICENSE"
   ],
@@ -59,7 +61,8 @@
     "build": "node scripts/build.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.client.json",
     "test": "npm run build && node --test test/*.test.mjs",
-    "verify": "npm run typecheck && npm test"
+    "check-release": "node scripts/check-release.mjs",
+    "verify": "npm run typecheck && npm test && npm run check-release"
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.4"
@@ -79,5 +82,17 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.9.0"
+  },
+  "author": "d0ublecl1ck",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d0ublecl1ck/dsh-unarchived-watch.git"
+  },
+  "homepage": "https://github.com/d0ublecl1ck/dsh-unarchived-watch",
+  "bugs": {
+    "url": "https://github.com/d0ublecl1ck/dsh-unarchived-watch/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
