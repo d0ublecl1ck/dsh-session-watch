@@ -1,0 +1,7 @@
+# FREAK
+
+- [ ] `src/client/WarningBadge.tsx` + `src/client/ThresholdRow.tsx` — 依赖框架的 standard props `useSessions` / `useWorkspaces`，但本仓库只用结构化类型描述它们，没有对 official 包做类型校验；official 改这一对 hook 的名字或快照字段时不会编译报错，只会在页面里静默失效。下次核对 `@deepseek-ai/dsh-client-ui-slots` 的 `GlobalStandardProps` 与 `SessionListState` / `WorkspaceSnapshot` 字段。记录：2026-10-02
+- [ ] `src/client/index.ts` — 注册 `settings.general.item` 依赖 ui-settings-general 的 General 条目声明该 slot；该 slot 的 owner 不投影 label，行内布局是自绘的。下次核对侧边栏/Dialog 尺寸变化后行的排版是否仍正常。记录：2026-10-02
+- [ ] `src/count.ts` — 计数读 `SessionListState.ids`/`byId` 与 `WorkspaceSnapshot.archivedSessionIds`；字段改名或 `origin`/`blank` 语义变化会导致计数静默变成 0 或偏大。下次核对这两个快照的实际字段与子代理/空会话判定。记录：2026-10-02
+- [ ] `package.json` — devDependencies 里的 `@types/react`、`react-dom`、`typescript` 与运行实例的 React 版本解耦；升级实例大版本时重新跑 `npm run verify`。记录：2026-10-02
+- [ ] 浏览器端最终挂载 — 单测只覆盖到「组件渲染出什么」，slot 真实挂载与样式需要刷新页面确认；页面里看不到图标时先看 `document.head` 里有没有 `<style data-plugin="dsh-unarchived-watch">`。记录：2026-10-02
