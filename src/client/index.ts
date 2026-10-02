@@ -15,6 +15,7 @@ import { en, zh } from './locales.js'
 import { injectStyles, removeStyles } from './styles.js'
 import { createThresholdSource } from './threshold.js'
 import { ThresholdRow } from './ThresholdRow.js'
+import { UnarchivedSection } from './UnarchivedSection.js'
 import { WarningBadge } from './WarningBadge.js'
 import type { ClientContext } from './types.js'
 
@@ -75,5 +76,27 @@ export function apply(ctx: ClientContext): void {
         ),
       ),
     'unarchived-watch: settings row',
+  )
+
+  // The board the icon points at: an ordinary Settings page beside the shipped
+  // sections. Same namespace gate as the row, so it appears exactly when the
+  // Host actually serves this plugin's config.
+  ctx.effect(
+    () =>
+      ctx.configForms.whileServed([NS], () =>
+        ctx.slots.inject('settings.section', () =>
+          ctx.slots.register(
+            {
+              name: 'settings.section',
+              id: NS,
+              order: 30,
+              label: () => t('section.nav'),
+              inject: () => ({ threshold, t }),
+            },
+            UnarchivedSection,
+          ),
+        ),
+      ),
+    'unarchived-watch: settings section',
   )
 }

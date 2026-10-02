@@ -51,6 +51,9 @@ export function WarningBadge({ useSessions, useWorkspaces, threshold, t }: Warni
     <Tooltip label={label} side="top" delayMs={200} portal>
       <span className="uw-badge" role="status" aria-label={label} data-unarchived-count={count}>
         <WarningIcon />
+        <span className="uw-badge-count" aria-hidden="true">
+          {count}
+        </span>
       </span>
     </Tooltip>
   )

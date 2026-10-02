@@ -36,6 +36,8 @@ test('the badge appears strictly above the threshold', () => {
   assert.match(markup, /role="status"/)
   // Hover/focus copy: the shell's tooltip receives the same accessible label.
   assert.match(markup, /data-tooltip="未归档会话 11 个，已超过阈值 10 个"/)
+  assert.match(markup, /class="uw-badge-count"/)
+  assert.match(markup, />11</, 'the icon carries the count itself')
   assert.match(markup, /未归档会话 11 个，已超过阈值 10 个/)
   assert.match(markup, /<svg/)
 })

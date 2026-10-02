@@ -186,10 +186,11 @@ export function sessionRows(count, variants = {}) {
   return { ids, byId }
 }
 
-/** Fake standard selector hooks over a Session list and an archive set. */
-export function standardHooks(list, archived = []) {
+/** Fake standard selector hooks over a Session list and a Workspace registry. */
+export function standardHooks(list, archived = [], items = []) {
+  const workspaces = { archivedSessionIds: archived, items }
   return {
     useSessions: (selector) => selector(list),
-    useWorkspaces: (selector) => selector({ archivedSessionIds: archived }),
+    useWorkspaces: (selector) => selector(workspaces),
   }
 }

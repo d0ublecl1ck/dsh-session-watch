@@ -59,6 +59,8 @@ export interface SlotRegistration {
   readonly name: string
   readonly id: string
   readonly order?: number
+  /** Display text where the owner projects one (nav rows): re-read on every projection. */
+  readonly label?: string | (() => string)
   readonly locale?: string
   readonly inject?: () => Record<string, unknown>
 }
