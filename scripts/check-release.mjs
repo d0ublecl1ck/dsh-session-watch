@@ -12,8 +12,9 @@
  *
  * @module dsh-unarchived-watch/scripts/check-release
  */
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { createHash } from 'node:crypto'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
@@ -24,18 +25,22 @@ const pass = (message) => passes.push(message)
 const read = (path) => readFileSync(join(root, path), 'utf8')
 const exists = (path) => existsSync(join(root, path))
 
-/** Newest mtime under a directory, or undefined when it holds no files. */
-function newestMtime(relativeDir) {
-  const absolute = join(root, relativeDir)
-  if (!existsSync(absolute)) return undefined
-  let newest
-  for (const entry of readdirSync(absolute, { withFileTypes: true, recursive: true })) {
-    if (!entry.isFile()) continue
-    const path = join(entry.parentPath ?? entry.path, entry.name)
-    const time = statSync(path).mtimeMs
-    if (newest === undefined || time > newest) newest = time
+/** SHA-256 of every build input, keyed by repo-relative path. */
+function sourceHashes() {
+  const hashes = {}
+  const record = (absolute) => {
+    hashes[relative(root, absolute)] = createHash('sha256').update(readFileSync(absolute)).digest('hex')
   }
-  return newest
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name)
+      if (entry.isDirectory()) walk(path)
+      else record(path)
+    }
+  }
+  walk(join(root, 'src'))
+  record(join(root, 'scripts/build.mjs'))
+  return hashes
 }
 
 /** The Web shell's platform module table (see dsh-web-frontend `staticModules`). */
@@ -98,14 +103,23 @@ if (typeof clientEntry === 'string' && exists(clientEntry)) {
   pass('client bundle: id=' + pkg.name + ', requires ' + [...required].sort().join(', '))
 }
 
-// 5. Build freshness: a stale lib/ is the failure mode that ships old code.
-const sourceTime = newestMtime('src')
-const scriptTime = newestMtime('scripts')
-const builtTime = newestMtime('lib')
-if (sourceTime === undefined || builtTime === undefined) fail('src/ or lib/ is missing; run npm run build')
-else if (builtTime < sourceTime || (scriptTime !== undefined && builtTime < scriptTime)) {
-  fail('lib/ is older than src/ or scripts/; run npm run build before committing or publishing')
-} else pass('lib/ is newer than src/ and scripts/')
+// 5. Build provenance: the shipping failure this project actually hits is a
+//    lib/ nobody rebuilt after editing src/. mtime cannot tell that on a fresh
+//    clone, so compare content hashes recorded at build time.
+if (!exists('lib/build-manifest.json')) fail('lib/build-manifest.json is missing; run npm run build')
+else {
+  const recorded = JSON.parse(read('lib/build-manifest.json')).sources ?? {}
+  const current = sourceHashes()
+  const drift = []
+  for (const [path, hash] of Object.entries(current)) {
+    if (recorded[path] === undefined) drift.push('new: ' + path)
+    else if (recorded[path] !== hash) drift.push('changed: ' + path)
+  }
+  for (const path of Object.keys(recorded)) if (current[path] === undefined) drift.push('removed: ' + path)
+  if (drift.length > 0) {
+    fail('lib/ was built from a different source tree; run npm run build (' + drift.slice(0, 5).join(', ') + ')')
+  } else pass('lib/ matches the recorded source hashes (' + Object.keys(recorded).length + ' inputs)')
+}
 
 // 6. Report.
 for (const line of passes) process.stdout.write('PASS ' + line + '\n')

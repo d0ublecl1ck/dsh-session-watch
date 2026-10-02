@@ -8,9 +8,9 @@
 
 ![DSH plugin](https://img.shields.io/badge/DSH-plugin-blueviolet)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![no write operations](https://img.shields.io/badge/state%20writes-none-brightgreen)
+![no archive writes](https://img.shields.io/badge/session%20or%20archive%20writes-none-brightgreen)
 
-**未归档会话积压的仪表灯：越线就亮，点开是一张按工作区分组的只读清单 —— 它不归档、不删除、不落盘。**
+**未归档会话积压的仪表灯：越线就亮，点开是一张按工作区分组的只读清单 —— 它不归档、不删除、不落盘；唯一会写的，是你在设置页设的那个阈值。**
 
 [它解决什么问题](#它解决什么问题) · [效果示例](#效果示例) · [快速开始](#快速开始) · [触发方式](#触发方式) · [它和同类有什么不同](#它和同类有什么不同) · [安全边界](#安全边界) · [文件结构](#文件结构) · [验证与测试](#验证与测试)
 
@@ -52,6 +52,8 @@ DSH 里的归档是个**手动动作**，而"该归档了"这件事没有任何�
   2  add_account            1  sub2api
   1  （未归属工作区）
 ```
+
+数字会跟着你的清理走：写这份文档的十几分钟里，同一个实例的归档集从 11 涨到 59，计数从 54 一路掉到 9（这时灯就灭了）。所以下面这句是**那个时刻**的真实读数，你自己跑 [scripts/replay-count.mjs](scripts/replay-count.mjs) 得到的一定是新的。
 
 悬停图标会显示一句话，屏幕阅读器读到的是同一句：
 
@@ -120,7 +122,7 @@ DSH 生态里已经有几个**归档管理器**（做得都很好）。这个插
 
 ## 安全边界
 
-- **不写任何状态**：没有 `archiveSession` / `unarchiveSession` / 删除调用；归档仍走官方侧边栏的行内动作。
+- **不写会话或归档状态**：没有 `archiveSession` / `unarchiveSession` / 删除调用；归档仍走官方侧边栏的行内动作。插件唯一的写入是你自己改的阈值 —— 它经 Host settings 存进 profile 的 `cordis.patch.yml`，那是配置，不是会话状态。
 - **不联网**：客户端只读 shell 已经发布的快照（`useSessions` / `useWorkspaces`），不发起任何网络请求。
 - **不落盘**：插件自己不建文件、不写 `localStorage`、不注册持久化 domain。
 - **不会静默误算**：徽标与看板共用 `src/count.ts` 一份实现，单测钉住两者相等；口径写在看板上也不藏。
@@ -153,7 +155,7 @@ npm run verify        # typecheck + build + 33 个单测 + check-release
 
 - **单测 33/33**：`test/count.test.mjs`（口径与边界）、`test/board.test.mjs`（选行/分组/时间分档）、`test/client-contract.test.mjs`（加载真实 `lib/client.js` 验模块 id 与三次注册）、`test/client-render.test.mjs` + `test/section-render.test.mjs`（`react-dom/server` 真渲染徽标、配置行、看板）。
 - **发布前体检**：`npm run check-release` 会拦住"改了 `src/` 忘了 `npm run build`"、`export default` 折掉 `inject`、浏览器产物 require 了 platform seed 之外的模块、以及 tarball 会漏掉 `cordis.patch.yml` 这四类发布事故。
-- **真实数据回放**：上面的数字就是用本机实例跑出来的；命令在 `CHANGELOG.md` 的 0.2.0 节有记法，任何人可以对同一实例复现。
+- **真实数据回放**：上面的数字是用本机实例跑出来的。[scripts/replay-count.mjs](scripts/replay-count.mjs) 就是当时用的脚本 —— 把实例的会话列表与 `storages/workspace.json` 喂给它，它在任何一台 DSH 实例上都能算出同样的口径与分组（命令见 `CHANGELOG.md` 的 0.2.0 节）。
 - **已知边界**：单测覆盖到"组件渲染出什么"为止；slot 在浏览器里的最终挂载与视觉效果需要刷新页面确认（页面里看不到图标时，先看 `document.head` 里有没有 `<style data-plugin="dsh-unarchived-watch">`）。
 
 ## License

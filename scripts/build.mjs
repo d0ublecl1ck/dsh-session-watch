@@ -5,8 +5,9 @@
 // Web shell's module table provides them) and inlines everything else, then
 // wraps the CJS output in `window.__ModuleLoader__.load({ id, factory })`.
 import { execSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { createHash } from 'node:crypto'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as esbuild from 'esbuild'
 
@@ -64,3 +65,24 @@ mkdirSync(join(root, 'lib'), { recursive: true })
 writeFileSync(join(root, 'lib/client.js'), wrapped)
 const map = join(tmp, 'client.js.map')
 if (existsSync(map)) copyFileSync(map, join(root, 'lib/client.js.map'))
+
+// 4) Record what this build was made from. mtimes do not survive a fresh
+//    clone; content hashes do, so check-release can tell a built-and-committed
+//    lib/ from a lib/ that nobody rebuilt after editing src/.
+const sources = {}
+const record = (absolute) => {
+  sources[relative(root, absolute)] = createHash('sha256').update(readFileSync(absolute)).digest('hex')
+}
+const walk = (dir) => {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name)
+    if (entry.isDirectory()) walk(path)
+    else record(path)
+  }
+}
+walk(join(root, 'src'))
+record(join(root, 'scripts/build.mjs'))
+writeFileSync(
+  join(root, 'lib/build-manifest.json'),
+  JSON.stringify({ package: pkg.name, version: pkg.version, sources }, null, 2) + '\n',
+)

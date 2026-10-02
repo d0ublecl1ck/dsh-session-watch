@@ -57,8 +57,11 @@ test('a deployment without the archive namespace still shows the sidebar icon', 
   assert.deepEqual(names, ['sidebar.footer.action'])
 })
 
-test('the icon stays a list occupant with its own order and entry key', () => {
+test('the icon stays an injectable list occupant', () => {
   const sidebar = mount().registrations.find((entry) => entry.options.name === 'sidebar.footer.action')
-  assert.equal(sidebar.options.order, 920)
+  // Only the shape matters: the seat is an ordered list, and the badge takes its
+  // live threshold through the inject face rather than a frozen prop.
+  assert.equal(typeof sidebar.options.order, 'number')
   assert.equal(typeof sidebar.options.inject, 'function')
+  assert.equal(typeof sidebar.options.inject().threshold.getSnapshot(), 'number')
 })

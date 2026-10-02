@@ -8,7 +8,7 @@
 
 ![DSH plugin](https://img.shields.io/badge/DSH-plugin-blueviolet)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![no write operations](https://img.shields.io/badge/state%20writes-none-brightgreen)
+![no archive writes](https://img.shields.io/badge/session%20or%20archive%20writes-none-brightgreen)
 
 **A dashboard light for unarchived-session backlog: it lights up when you cross the threshold and opens a read-only list grouped by workspace. It never archives, deletes, or persists anything.**
 
@@ -79,7 +79,7 @@ The threshold also lives in the profile's `cordis.patch.yml` — note that **the
 
 ## Safety
 
-- **No state writes**: no `archiveSession`, `unarchiveSession`, or delete call anywhere.
+- **No session or archive state writes**: no `archiveSession`, `unarchiveSession`, or delete call anywhere. The plugin's only write is the threshold you change yourself — it goes through the Host settings transport into the profile's `cordis.patch.yml`, which is configuration, not session state.
 - **No network**: the client only reads snapshots the shell already publishes (`useSessions` / `useWorkspaces`).
 - **No persistence**: no files, no `localStorage` keys, no storage domain of its own.
 - **No silent miscount**: the badge and the board share one implementation in `src/count.ts`, with a unit test pinning them equal; the counting scope is printed on the board itself.
