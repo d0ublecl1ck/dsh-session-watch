@@ -10,7 +10,7 @@
  *
  * Every failure names the file and the fix. Usage: `npm run check-release`.
  *
- * @module dsh-unarchived-watch/scripts/check-release
+ * @module dsh-session-watch/scripts/check-release
  */
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'

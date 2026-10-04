@@ -1,11 +1,12 @@
-# dsh-unarchived-watch bundle patch: one host row carrying the plugin and,
-# through `dsh.client`, its browser roster entry. Apply after dsh-base +
-# dsh-web-app, which bring the sidebar foot (ui-sidebar), the Settings page
-# (ui-settings / ui-settings-general), and the Session list the badge counts.
+# dsh-session-watch bundle patch: one host row carrying the plugin and,
+# through dsh.client, its browser roster entry. Apply after dsh-base +
+# dsh-web-app, which bring the sidebar foot (ui-sidebar), the Session list,
+# the Session UI status stream (ui-session), the Workspace archive set
+# (ui-workspace), and the Settings page (ui-settings / ui-settings-general).
 #
 # The row id is also the Settings namespace: the client half reads and writes
-# this plugin's preference through `configForms.get('unarchived-watch')`.
+# this plugin's preference through configForms.get('session-watch').
 # Renaming the id therefore moves the preference namespace with it.
 - insert:
-    - id: unarchived-watch
-      name: 'dsh-unarchived-watch'
+    - id: session-watch
+      name: 'dsh-session-watch'

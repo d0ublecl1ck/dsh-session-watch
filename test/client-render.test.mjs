@@ -5,58 +5,132 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { mount, sessionRows, standardHooks, translate } from './harness.mjs'
+import { mount, sessionRows, standardHooks, statusMap, translate } from './harness.mjs'
 
 /** Render one registered component with the props the framework composes. */
-function renderRegistered(mounted, name, extra) {
+function renderRegistered(mounted, name, extra, locale = 'zh') {
   const entry = mounted.registrations.find((candidate) => candidate.options.name === name)
   assert.notEqual(entry, undefined, name + ' must be registered')
   const face = entry.options.inject()
   const props = {
     wide: true,
-    threshold: face.threshold,
-    t: translate(mounted),
+    config: face.config,
+    t: translate(mounted, locale),
     ...extra,
   }
   return renderToStaticMarkup(createElement(entry.component, props))
 }
 
-test('the badge stays hidden while the count is at the threshold', () => {
+/**
+ * The fixture shared by the readout tests: six ordinary Sessions split across
+ * every metric, plus one subagent child and one blank seat that must not count.
+ */
+function fixture() {
+  const list = sessionRows(8, {
+    'session-6': { parentId: 'session-0' },
+    'session-7': { blank: true },
+  })
+  const statuses = statusMap(
+    ['session-0', { running: true }],
+    ['session-1', { running: true, pendingInteraction: { kind: 'approval' } }],
+    ['session-2', { running: false, completionUnread: true }],
+    ['session-3', { running: false, completionUnread: false }],
+    ['session-4', {}],
+    ['session-5', {}],
+  )
+  const archived = ['session-4', 'session-5']
+  return { list, statuses, archived }
+}
+
+test('the chips readout shows every visible metric with its own count', () => {
   const mounted = mount()
-  const list = sessionRows(10)
-  const markup = renderRegistered(mounted, 'sidebar.footer.action', standardHooks(list, []))
-  assert.equal(markup, '', 'ten unarchived sessions with a threshold of ten show nothing')
+  const { list, statuses, archived } = fixture()
+  const markup = renderRegistered(mounted, 'sidebar.footer.action', standardHooks(list, archived, [], statuses))
+  assert.match(markup, /data-variant="chips"/)
+  for (const metric of ['running', 'unread', 'pending', 'idle', 'unarchived', 'archived']) {
+    assert.match(markup, new RegExp('data-metric="' + metric + '"'), 'the ' + metric + ' chip is rendered')
+  }
+  assert.match(markup, /data-metric="running"[^>]*>[\s\S]*?sw-chip-count">1</)
+  assert.match(markup, /data-metric="pending"[^>]*>[\s\S]*?sw-chip-count">1</)
+  assert.match(markup, /data-metric="unread"[^>]*>[\s\S]*?sw-chip-count">1</)
+  assert.match(markup, /data-metric="idle"[^>]*>[\s\S]*?sw-chip-count">1</)
+  assert.match(markup, /data-metric="unarchived"[^>]*>[\s\S]*?sw-chip-count">4</)
+  assert.match(markup, /data-metric="archived"[^>]*>[\s\S]*?sw-chip-count">2</)
 })
 
-test('the badge appears strictly above the threshold', () => {
-  const mounted = mount()
-  const list = sessionRows(11)
-  const markup = renderRegistered(mounted, 'sidebar.footer.action', standardHooks(list, []))
-  assert.match(markup, /data-unarchived-count="11"/)
-  assert.match(markup, /role="status"/)
-  // Hover/focus copy: the shell's tooltip receives the same accessible label.
-  assert.match(markup, /data-tooltip="未归档会话 11 个，已超过阈值 10 个"/)
-  assert.match(markup, /class="uw-badge-count"/)
-  assert.match(markup, />11</, 'the icon carries the count itself')
-  assert.match(markup, /未归档会话 11 个，已超过阈值 10 个/)
-  assert.match(markup, /<svg/)
+test('only the enabled metrics are rendered', () => {
+  const mounted = mount({ value: { showIdle: false, showArchived: false } })
+  const { list, statuses, archived } = fixture()
+  const markup = renderRegistered(mounted, 'sidebar.footer.action', standardHooks(list, archived, [], statuses))
+  assert.doesNotMatch(markup, /data-metric="idle"/)
+  assert.doesNotMatch(markup, /data-metric="archived"/)
+  assert.match(markup, /data-metric="running"/)
 })
 
-test('archived and subagent sessions do not push the badge over the line', () => {
-  const mounted = mount()
-  // 12 ordinary rows, of which 2 are archived and 1 is a subagent child.
-  const list = sessionRows(12, { 'session-11': { parentId: 'session-0' } })
-  const hooks = standardHooks(list, ['session-9', 'session-10'])
-  const markup = renderRegistered(mounted, 'sidebar.footer.action', hooks)
-  assert.equal(markup, '', '12 rows minus 2 archived minus 1 child is 9, below ten')
+test('hiding every metric renders nothing at all', () => {
+  const mounted = mount({
+    value: {
+      showRunning: false,
+      showUnread: false,
+      showPending: false,
+      showIdle: false,
+      showUnarchived: false,
+      showArchived: false,
+    },
+  })
+  const { list, statuses, archived } = fixture()
+  const markup = renderRegistered(mounted, 'sidebar.footer.action', standardHooks(list, archived, [], statuses))
+  assert.equal(markup, '')
 })
 
-test('the settings row shows the accepted threshold, the live count, and the input', () => {
-  const mounted = mount({ threshold: 7 })
-  const list = sessionRows(9)
-  const markup = renderRegistered(mounted, 'settings.general.item', standardHooks(list, []))
-  assert.match(markup, /未归档会话提醒/)
-  assert.match(markup, /当前 9 个未归档，阈值 7 个/)
+test('the unarchived metric turns warning-coloured past the threshold', () => {
+  const above = mount({ threshold: 3 })
+  const { list, statuses, archived } = fixture()
+  const warned = renderRegistered(above, 'sidebar.footer.action', standardHooks(list, archived, [], statuses))
+  assert.match(warned, /data-metric="unarchived" data-warn="true"/)
+  assert.match(warned, /未归档 4 个，已超过阈值 3 个/)
+
+  const below = mount({ threshold: 10 })
+  const quiet = renderRegistered(below, 'sidebar.footer.action', standardHooks(list, archived, [], statuses))
+  assert.match(quiet, /data-metric="unarchived"([^>]*)>/)
+  assert.doesNotMatch(quiet, /data-metric="unarchived" data-warn="true"/)
+})
+
+test('the collapsed rail shows one mark with the unarchived count', () => {
+  const mounted = mount()
+  const { list, statuses, archived } = fixture()
+  const markup = renderRegistered(mounted, 'sidebar.footer.action', {
+    wide: false,
+    ...standardHooks(list, archived, [], statuses),
+  })
+  assert.match(markup, /class="sw-rail"/)
+  assert.match(markup, /class="sw-rail-count"[^>]*>4</)
+  assert.doesNotMatch(markup, /sw-chip/)
+})
+
+test('the meter layout renders the bar and the same legend numbers', () => {
+  const mounted = mount({ variant: 'meter' })
+  const { list, statuses, archived } = fixture()
+  const markup = renderRegistered(mounted, 'sidebar.footer.action', standardHooks(list, archived, [], statuses))
+  assert.match(markup, /data-variant="meter"/)
+  assert.match(markup, /class="sw-meter-bar"/)
+  assert.match(markup, /class="sw-meter-seg" data-metric="running"/)
+  assert.match(markup, /data-metric="unarchived"[^>]*>[\s\S]*?sw-chip-count">4</)
+})
+
+test('the settings row offers every toggle, every layout, and the threshold input', () => {
+  const mounted = mount({ threshold: 7, variant: 'grid' })
+  const { list, statuses, archived } = fixture()
+  const markup = renderRegistered(mounted, 'settings.general.item', standardHooks(list, archived, [], statuses))
+  assert.match(markup, /Session Watch 状态显示/)
+  for (const metric of ['running', 'unread', 'pending', 'idle', 'unarchived', 'archived']) {
+    assert.match(markup, new RegExp('class="sw-toggle" data-metric="' + metric + '"'))
+  }
+  assert.equal((markup.match(/type="checkbox"/g) ?? []).length, 6, 'one checkbox per metric')
+  for (const label of ['胶囊', '比例条']) {
+    assert.match(markup, new RegExp(label), 'the ' + label + ' layout control is offered')
+  }
+  assert.equal((markup.match(/sw-variant[" ]/g) ?? []).length, 2, 'exactly the two offered layouts render')
   assert.match(markup, /<input[^>]*type="number"/)
   assert.match(markup, /<input[^>]*value="7"/)
   assert.match(markup, /未归档会话阈值/)
@@ -64,15 +138,7 @@ test('the settings row shows the accepted threshold, the live count, and the inp
 
 test('the settings row localizes to English when the dictionary is bound', () => {
   const mounted = mount({ threshold: 7 })
-  const list = sessionRows(9)
-  const entry = mounted.registrations.find((candidate) => candidate.options.name === 'settings.general.item')
-  const face = entry.options.inject()
-  const markup = renderToStaticMarkup(createElement(entry.component, {
-    wide: true,
-    threshold: face.threshold,
-    t: translate(mounted, 'en'),
-    ...standardHooks(list, []),
-  }))
-  assert.match(markup, /Unarchived session warning/)
-  assert.match(markup, /Currently 9 unarchived, threshold 7/)
+  const markup = renderRegistered(mounted, 'settings.general.item', standardHooks(sessionRows(2)), 'en')
+  assert.match(markup, /Session Watch readout/)
+  assert.match(markup, /Unarchived session threshold/)
 })

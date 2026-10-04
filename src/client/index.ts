@@ -1,28 +1,27 @@
 /**
- * Client half: the sidebar-foot warning icon and the Settings row that edits
- * its threshold.
+ * Client half: the sidebar-foot Session Watch readout and the Settings row that
+ * chooses what it shows.
  *
- * Both surfaces read the same two shell snapshots through the framework's
- * standard selectors — the Session list (`useSessions`) and the Workspace
- * archive set (`useWorkspaces`) — so the count is always the one the sidebar
- * itself would render. The threshold is this plugin's own config namespace,
- * reached through `ctx.configForms`; the Settings row is registered only while
- * the Host actually serves that namespace.
+ * Both surfaces read the same three shell snapshots through the framework's
+ * standard selectors — the Session list (useSessions), the unified Session UI
+ * status (useSessionStatus), and the Workspace archive set (useWorkspaces) — so
+ * every number is the one the sidebar itself would render. The preference is
+ * this plugin's own config namespace, reached through ctx.configForms; the
+ * Settings row is registered only while the Host actually serves that
+ * namespace.
  *
- * @module dsh-unarchived-watch/client
+ * @module dsh-session-watch/client
  */
+import { PLUGIN_ID } from '../config.js'
 import { en, zh } from './locales.js'
 import { injectStyles, removeStyles } from './styles.js'
-import { createThresholdSource } from './threshold.js'
-import { ThresholdRow } from './ThresholdRow.js'
-import { WarningBadge } from './WarningBadge.js'
+import { createConfigSource } from './config-source.js'
+import { SettingsRow } from './SettingsRow.js'
+import { StatusWatch } from './StatusWatch.js'
 import type { ClientContext } from './types.js'
 
-/** Dictionary namespace, config namespace, and both slot entry ids. */
-const NS = 'unarchived-watch'
-
 /** Services required before this plugin mounts. */
-export const inject = ['slots', 'locale', 'configForms', 'sessions', 'workspaces', 'uiSession', 'uiWorkspace']
+export const inject = ['slots', 'locale', 'configForms', 'sessions', 'uiSession', 'workspaces', 'uiWorkspace']
 
 /**
  * Mount the browser half.
@@ -35,25 +34,25 @@ export function apply(ctx: ClientContext): void {
       style.remove()
       removeStyles()
     }
-  }, 'unarchived-watch: styles')
+  }, 'session-watch: styles')
 
-  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'unarchived-watch: dictionaries')
+  ctx.effect(() => ctx.locale.register(PLUGIN_ID, { zh, en }), 'session-watch: dictionaries')
 
-  const t = ctx.locale.bind(NS)
-  const threshold = createThresholdSource(ctx.configForms.get(NS))
-  ctx.effect(() => () => threshold.dispose(), 'unarchived-watch: threshold source')
+  const t = ctx.locale.bind(PLUGIN_ID)
+  const config = createConfigSource(ctx.configForms.get(PLUGIN_ID))
+  ctx.effect(() => () => config.dispose(), 'session-watch: config source')
 
-  // The indicator is unconditional: it simply renders nothing until the count
-  // is past the threshold, so the sidebar foot never reflows on a config edit.
+  // The readout is unconditional: it renders nothing only when every metric is
+  // hidden, so the sidebar foot never reflows on a config edit.
   ctx.slots.inject('sidebar.footer.action', () =>
     ctx.slots.register(
       {
         name: 'sidebar.footer.action',
-        id: NS,
+        id: PLUGIN_ID,
         order: 920,
-        inject: () => ({ threshold, t }),
+        inject: () => ({ config, t }),
       },
-      WarningBadge,
+      StatusWatch,
     ),
   )
 
@@ -61,19 +60,19 @@ export function apply(ctx: ClientContext): void {
   // never served it shows no trace of the row.
   ctx.effect(
     () =>
-      ctx.configForms.whileServed([NS], () =>
+      ctx.configForms.whileServed([PLUGIN_ID], () =>
         ctx.slots.inject('settings.general.item', () =>
           ctx.slots.register(
             {
               name: 'settings.general.item',
-              id: NS,
+              id: PLUGIN_ID,
               order: 16,
-              inject: () => ({ threshold, t }),
+              inject: () => ({ config, t }),
             },
-            ThresholdRow,
+            SettingsRow,
           ),
         ),
       ),
-    'unarchived-watch: settings row',
+    'session-watch: settings row',
   )
 }

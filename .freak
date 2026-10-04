@@ -1,20 +1,24 @@
 # FREAK
 
 ## 对标观察（每轮回炉先看这几家）
-- [ ] `omdsh-dev/DSH-better-sidebar`（3943★，hero 图 + DSH 版本↔插件版本兼容矩阵）、`omdsh-dev/dsh-notification`（85★，ASCII 图讲 host→client 两半）、`Bing-Bryan/dsh-unread-dot`（3★ 也进目录，首屏"效果图 + 一句话原理 + 一条命令 + 使用前提"四件套）、`yangyizhu8/dsh-unread-mark`（0★，状态-动作矩阵 + 官方源码行号 + CDP 实测数值）。我们的首屏缺的正是"效果图 + 验收数值"，下次照 `dsh-unread-dot` 的四件套补。记录：2026-10-02
+- [ ] `omdsh-dev/DSH-better-sidebar`（hero 图 + DSH 版本↔插件版本兼容矩阵）、`omdsh-dev/dsh-notification`（ASCII 图讲 host→client 两半）、`Bing-Bryan/dsh-unread-dot`（首屏"效果图 + 一句话原理 + 一条命令 + 使用前提"四件套）、`yangyizhu8/dsh-unread-mark`（状态-动作矩阵 + 官方源码行号 + CDP 实测数值）。我们的首屏缺的正是"效果图 + 验收数值"。记录：2026-10-02
 - [ ] `Zephyr-vibe/dsh-archived-sessions`、`ChuShiZ/dsh-archive-manager`、`AKS1st/dsh-archived-conversations` —— 归档管理三强。**IF** 以后要加一键归档/恢复 **THEN** 先读它们的 README 与安全提示，确认我们不重复造管理器。记录：2026-10-02
 - [ ] `awesome-dsh-plugin/awesome-dsh-plugin` 的 `data/plugins/<owner>__<repo>.yml`（字段 `url/name/category/description.en`，`description.zh` 可选）—— 我们还没投稿；3★ 也能收录，说明门槛是"提交一个 yml"而不是热度。记录：2026-10-02
 
 ## 未验证 / 可能漂移
-- [ ] `src/client/WarningBadge.tsx` — 依赖框架的 standard props `useSessions` / `useWorkspaces`，但本仓库只用结构化类型描述它们，没有对 official 包做类型校验；改名或字段语义变化不会编译报错，只会静默失效。下次核对 `GlobalStandardProps`、`SessionListState`、`WorkspaceSnapshot`。记录：2026-10-02
-- [ ] 徽标数量角标 — `.uw-badge-count` 绝对定位在 28px 图标右上角，侧边栏收成 56px rail 时可能被 `footerActions` 的 `overflow: hidden` 裁掉；**尚未在 rail 形态下人眼确认**。下次刷新页面时把侧边栏折起来看一眼。记录：2026-10-02
-- [ ] `src/count.ts` — 计数读 `SessionListState.ids`/`byId` 与 `WorkspaceSnapshot.archivedSessionIds`；字段改名或 `origin`/`blank` 语义变化会导致计数静默变成 0 或偏大。下次核对这两个快照的实际字段。记录：2026-10-02
-- [ ] 浏览器端最终挂载 — 单测只覆盖到"组件渲染出什么"，slot 真实挂载与样式需要刷新页面确认；页面里看不到图标时先看 `document.head` 里有没有 `<style data-plugin="dsh-unarchived-watch">`。0.3.0 移除看板后，还应确认设置页左侧导航不再出现「未归档会话」入口。记录：2026-10-02
+- [ ] `src/client/StatusWatch.tsx` / `src/client/use-counts.ts` — 依赖框架 standard props `useSessions` / `useSessionStatus` / `useWorkspaces`，仓库只用结构化类型描述它们，没有对 official 包做类型校验；改名或字段语义变化不会编译报错，只会静默失效。下次核对 `GlobalStandardProps`、`SessionListState`、`SessionStatusSnapshot`、`WorkspaceSnapshot`。记录：2026-10-04
+- [ ] 读数在 56px rail 形态的排布 — `.sw-chip` / `.sw-legend` 挂在 `footerActions` 内，rail（56px）下可能被 `overflow: hidden` 裁掉；**尚未人眼确认**。下次刷新后把侧边栏折起来看一眼。记录：2026-10-04
+- [ ] `src/count.ts` — 六项计数读 `SessionListState.ids/byId`、`SessionStatusSnapshot.pendingInteraction` 与 `WorkspaceSnapshot.archivedSessionIds`；字段改名或 `origin`/`blank` 语义变化会让计数静默变 0 或偏大。下次核对这三个快照的实际字段。记录：2026-10-04
+- [ ] 浏览器端最终挂载 — 单测只覆盖"组件渲染出什么"，slot 真实挂载与样式需刷新页面确认；页面里看不出读数时先看 `document.head` 有没有 `<style data-plugin="dsh-session-watch">`。记录：2026-10-04
 - [ ] `package.json` — devDependencies 里的 `@types/react`、`react-dom`、`typescript` 与运行实例的 React 版本解耦；升级实例大版本时重新跑 `npm run verify`。记录：2026-10-02
-- [ ] `package.json dsh.client.inject` — 0.3.0 事故后保留了 `@deepseek-ai/dsh-client-ui-settings`（即使看板已删）：它是否真被 `settings.general.item` 的声明链需要，**未单独验证**；下次想裁剪名单时先在实例里 remove+add 后人眼确认设置行仍在。记录：2026-10-02
-- [ ] 客户端产物变更的生效路径 — `dsh-client-modules` 的组合图只在 fiber 生命周期（plugin add/remove/update）或 HMR dev watcher 时重建；**改 `lib/` 后只刷新页面，旧 rev URL 会按 immutable 策略被拒，整个客户端模块（含侧边栏徽标）一起消失**。改完产物必须对目标实例执行 `dsh plugin --profile web remove dsh-unarchived-watch && dsh plugin --profile web add <本目录>`（DSH_HOME 指向实例 home）。记录：2026-10-02
+- [ ] `package.json dsh.client.inject` — 0.3.0 事故后保留了 `@deepseek-ai/dsh-client-ui-settings`：它是否真被 `settings.general.item` 的声明链需要**未单独验证**；下次裁剪名单前先在实例里 remove+add 后人眼确认设置行仍在。记录：2026-10-02
+- [ ] 客户端产物变更的生效路径 — `dsh-client-modules` 的组合图只在 fiber 生命周期（plugin add/remove/update）或 HMR dev watcher 时重建；**改 `lib/` 后只刷新页面，旧 rev URL 会被 immutable 拒绝，整个客户端模块（含读数）一起消失**。改完产物必须对目标实例执行 `dsh plugin --profile web remove dsh-session-watch && dsh plugin --profile web add <本目录>`（`DSH_HOME` 指向实例 home）。记录：2026-10-02
+
+## 改名与合并线索
+- [ ] 0.4.0 改名（`dsh-unarchived-watch` → `dsh-session-watch`，row id / 设置命名空间 / slot entry id 同步改）—— 桌面实例 `profiles/web/cordis.patch.yml` 里旧的 `- id: unarchived-watch` 行已失效（`dump-config` 报 `patch: entry "unarchived-watch" not found`），2026-10-04 已删除该行。**IF** 之后再加设置项 **THEN** 用新命名空间 `session-watch` 写配置。记录：2026-10-04
+- [ ] 与 `dsh-unread-helper` 合并 —— 六项计数与设置行正在并入 `dsh-unread-helper@1.0.0`（单 bundle 单客户端入口，偏好挂到 `unread-helper` 命名空间）。**IF** 合并发布 **THEN** 本包在 GitHub 与 npm 上都标记为已并入（`npm deprecate dsh-session-watch`），并决定仓库归档。记录：2026-10-04
 
 ## 下一轮入口（本轮明确不做）
 - [ ] 一键归档入口（接 `uiWorkspace.archiveSession`，要处理"会话有运行中工作会被拒"的报错）—— 属状态写操作，需用户单独授权。
-- [ ] 首屏截图/GIF + 录制脚本入库（0.3.0 后首屏只剩侧边栏徽标 + 设置行两张图）。
-- [ ] 投稿 awesome-dsh-plugin；加 CI（目前无 `.github/`，所以"绿"只能靠本地 `npm run verify`）。
+- [ ] 首屏截图/GIF + 录制脚本入库。
+- [ ] 投稿 awesome-dsh-plugin（`data/plugins/d0ublecl1ck__dsh-session-watch.yml`）；加 CI（目前无 `.github/`，"绿"只能靠本地 `npm run verify`）。

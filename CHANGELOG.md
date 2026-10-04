@@ -2,6 +2,24 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的分节习惯，版本号遵循语义化版本。
 
+## 0.4.0 — 2026-10-03
+
+### 变更（破坏性）
+- **改名**：包名 `dsh-unarchived-watch` -> `dsh-session-watch`；row id / 设置命名空间 / 两个 slot entry id 从 `unarchived-watch` -> `session-watch`。设置命名空间随之改变，profile 里旧的 `unarchived-watch` 配置不再被读取（需按新 id 重写）。
+- **计数口径扩展**：在 `countUnarchived` 之上新增 `countSessions`，一次返回六项：运行中 / 未读 / 待处理 / 闲置 / 未归档 / 已归档。活动四项按 `待处理 > 运行中 > 未读 > 闲置` 归类，四者之和恒等于未归档数；`countUnarchived` 改为它的 `unarchived` 投影，旧行为不变。
+
+### 新增
+- 侧边栏底部**常驻状态读数**，两种版式：胶囊（默认）与比例条；56px rail 折叠为单图标 + 未归档角标。
+- 设置页「Session Watch 状态显示」行：六项计数逐项开关 + 版式切换 + 未归档告警阈值；全部为 volatile 字段。
+- `test/` 从 22 个扩到 31 个：六项口径、分区不变量、配置字段写入映射、两种版式的 SSR 渲染。
+
+### 移除
+- `src/client/WarningBadge.tsx`、`WarningIcon.tsx`、`ThresholdRow.tsx`、`threshold.ts`，由 `StatusWatch.tsx`、`SettingsRow.tsx`、`config-source.ts`、`icons.tsx` 取代。
+- 先做过、再按用户取舍删掉的「数字格」「紧凑」两种版式；`normalizeVariant` 对未知版式回退到默认，不会渲染空白。
+
+### 说明
+- 为什么未读/待处理取官方状态：它们与官方侧边栏行状态点同源，插件因此不需要第二个数据 owner；代价是与 `dsh-unread-helper` 的跨重启账本数字可能不同。
+
 ## 0.3.0 — 2026-10-02
 
 ### 移除

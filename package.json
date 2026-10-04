@@ -1,7 +1,7 @@
 {
-  "name": "dsh-unarchived-watch",
-  "version": "0.3.0",
-  "description": "DSH Web 插件：未归档会话数超过阈值时，在侧边栏底部显示警告图标；阈值在设置页配置。",
+  "name": "dsh-session-watch",
+  "version": "0.4.0",
+  "description": "DSH Web 插件：侧边栏底部显示运行中/未读/待处理/闲置/未归档/已归档的会话计数，可在设置页逐项开关。",
   "type": "module",
   "license": "MIT",
   "main": "lib/index.js",
@@ -35,9 +35,10 @@
     "deepseek-harness",
     "deepseek",
     "session",
-    "archive",
-    "warning",
-    "sidebar"
+    "status",
+    "sidebar",
+    "watch",
+    "archive"
   ],
   "dsh": {
     "bundle": {
@@ -50,6 +51,7 @@
         "@deepseek-ai/dsh-api-workspace-controller",
         "@deepseek-ai/dsh-client-ui-primitives",
         "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-session",
         "@deepseek-ai/dsh-client-ui-settings",
         "@deepseek-ai/dsh-client-ui-settings-general",
         "@deepseek-ai/dsh-client-ui-slots",
@@ -86,11 +88,11 @@
   "author": "d0ublecl1ck",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/d0ublecl1ck/dsh-unarchived-watch.git"
+    "url": "git+https://github.com/d0ublecl1ck/dsh-session-watch.git"
   },
-  "homepage": "https://github.com/d0ublecl1ck/dsh-unarchived-watch",
+  "homepage": "https://github.com/d0ublecl1ck/dsh-session-watch",
   "bugs": {
-    "url": "https://github.com/d0ublecl1ck/dsh-unarchived-watch/issues"
+    "url": "https://github.com/d0ublecl1ck/dsh-session-watch/issues"
   },
   "publishConfig": {
     "access": "public"

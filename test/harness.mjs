@@ -1,12 +1,12 @@
 /**
  * Shared harness for the tests that exercise the *built* browser half:
  * load lib/client.js in its own realm, instantiate the factory with a real
- * `react`, and mount it against a fake client context.
+ * react, and mount it against a fake client context.
  *
  * The DSH module loader only cares about three things in lib/client.js: the
- * module id equals the package name, the factory returns an `apply`, and the
- * returned `inject` list names the services `apply` touches. A wrong id or a
- * swallowed `inject` fails silently in the browser, so these helpers mount
+ * module id equals the package name, the factory returns an apply, and the
+ * returned inject list names the services apply touches. A wrong id or a
+ * swallowed inject fails silently in the browser, so these helpers mount
  * the real artifact instead of a re-implementation of it.
  */
 import assert from 'node:assert/strict'
@@ -102,6 +102,12 @@ export function fakeContext(page, options = {}) {
   const injects = []
   const locales = []
   const effects = []
+  const writes = []
+  const value = {
+    threshold: options.threshold ?? 10,
+    variant: options.variant ?? 'chips',
+    ...(options.value ?? {}),
+  }
   const ctx = {
     effect(callback, label) {
       effects.push(label)
@@ -135,9 +141,12 @@ export function fakeContext(page, options = {}) {
     configForms: {
       get() {
         return {
-          getSnapshot: () => ({ value: { threshold: options.threshold ?? 10 } }),
+          getSnapshot: () => ({ value }),
           subscribe: () => () => {},
-          set: async () => true,
+          set: async (field, next) => {
+            writes.push([field, next])
+            return options.acceptWrites === false ? false : true
+          },
         }
       },
       whileServed(namespaces, register) {
@@ -150,12 +159,12 @@ export function fakeContext(page, options = {}) {
     },
     get: () => undefined,
   }
-  return { ctx, registrations, injects, locales, effects }
+  return { ctx, registrations, injects, locales, effects, writes }
 }
 
 /**
  * Mount the built client half and return everything it registered.
- * @param options - threshold / serveNamespace overrides for the fake Host.
+ * @param options - threshold / variant / visibility / serveNamespace overrides for the fake Host.
  */
 export function mount(options = {}) {
   const page = fakeDocument()
@@ -174,7 +183,7 @@ export function translate(mounted, locale = 'zh') {
     String(dicts[key]).replace(/\{(\w+)\}/g, (_, name) => (params && name in params ? String(params[name]) : '{' + name + '}'))
 }
 
-/** Build a Session list snapshot of `count` ordinary rows. */
+/** Build a Session list snapshot of count ordinary rows. */
 export function sessionRows(count, variants = {}) {
   const ids = []
   const byId = {}
@@ -186,11 +195,17 @@ export function sessionRows(count, variants = {}) {
   return { ids, byId }
 }
 
-/** Fake standard selector hooks over a Session list and a Workspace registry. */
-export function standardHooks(list, archived = [], items = []) {
+/** Build a Session status map from [id, status] pairs. */
+export function statusMap(...rows) {
+  return new Map(rows)
+}
+
+/** Fake standard selector hooks over a Session list, statuses, and a Workspace registry. */
+export function standardHooks(list, archived = [], items = [], statuses = new Map()) {
   const workspaces = { archivedSessionIds: archived, items }
   return {
     useSessions: (selector) => selector(list),
+    useSessionStatus: (selector) => selector(statuses),
     useWorkspaces: (selector) => selector(workspaces),
   }
 }

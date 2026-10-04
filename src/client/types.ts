@@ -1,16 +1,16 @@
 /**
  * Structural view of the client services and framework hooks this plugin uses.
  *
- * The bundle is installed with `link:` and resolves its own imports, so the
+ * The bundle is installed with link: and resolves its own imports, so the
  * client half deliberately does not import the official packages for types:
  * every shape below is the part of the real contract this plugin actually
  * touches. That keeps the runtime dependency surface at React plus React's
  * own platform modules.
  *
- * @module dsh-unarchived-watch/client/types
+ * @module dsh-session-watch/client/types
  */
 
-/** Translate one dictionary key, with optional `{name}` template params. */
+/** Translate one dictionary key, with optional named template params. */
 export type Translate = (key: string, params?: Record<string, unknown>) => string
 
 /** Selector hook over an observable snapshot (the framework's standard seat). */
@@ -19,7 +19,7 @@ export interface SnapshotSelectorHook {
   <Selected>(selector: (state: any) => Selected, equal?: (left: Selected, right: Selected) => boolean): Selected
 }
 
-/** One plugin entry's live config form, as `ctx.configForms.get(id)` returns it. */
+/** One plugin entry's live config form, as ctx.configForms.get(id) returns it. */
 export interface ConfigFormLike {
   /** @returns the current redacted view of the entry's volatile fields. */
   getSnapshot(): ConfigFormSnapshot
@@ -31,7 +31,10 @@ export interface ConfigFormLike {
 
 /** The slice of a config form view this plugin reads. */
 export interface ConfigFormSnapshot {
-  readonly value?: { readonly threshold?: unknown } | undefined
+  /** The namespace's resolved value, holding every volatile field. */
+  readonly value?: Readonly<Record<string, unknown>> | undefined
+  /** Whether the active profile accepts form writes. */
+  readonly writable?: boolean | undefined
 }
 
 /** The settings service face: per-namespace forms and namespace-gated registration. */

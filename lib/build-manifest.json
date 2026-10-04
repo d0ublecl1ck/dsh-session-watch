@@ -1,18 +1,21 @@
 {
-  "package": "dsh-unarchived-watch",
-  "version": "0.3.0",
+  "package": "dsh-session-watch",
+  "version": "0.4.0",
   "sources": {
-    "src/client/ThresholdRow.tsx": "68030c2f7962eb5a2d6a2cc7012b8f50e9ea6b40d0caed17d1dae0b988542dd4",
-    "src/client/WarningBadge.tsx": "92474f0c9f55f83a1e29ea97105ed4903865eb9b3692af9395acbd9207848744",
-    "src/client/WarningIcon.tsx": "8e3d2d05dfc661c85855ac548964b3d30049c27ab43b9ab389f2a1b28c0062b0",
-    "src/client/index.ts": "5aa9d9c637bff4c20316df6c87f6544ebff02a4904cb20534b1712476ecd84ca",
-    "src/client/locales.ts": "938a42cafcf3182305d4322193804fc4622fac320db5d8cc2c73bcca2067e7e8",
+    "src/client/SettingsRow.tsx": "55c671bc1187249452c806c5ed8ab8f613b2f3cc3cac0fd50e17b4f2794a2baa",
+    "src/client/StatusWatch.tsx": "b8969d8979828eb50f5cf7340e881e4afff0f6ee9ca319a4a7ad0997fc84ac16",
+    "src/client/config-source.ts": "3b6369f430ea299b6e45f7de751d7d073a1bb94636c7032f731b92456affd3b9",
+    "src/client/icons.tsx": "7e3890df65a66667c114716ac9edd9a2ba13322884524c9a1318e1cab43a02da",
+    "src/client/index.ts": "96d7f8ea0f5ae164472c3dece0b598324b131bd72a18c105c72f0a3211c475a8",
+    "src/client/locales.ts": "0fbf3134e23b674b18f81b9a60975c84be70a91ab700ffd783355498d3a1fed5",
     "src/client/platform.d.ts": "23cd01c7c31347fc8e6b84add00d5e0f51b8a298b5680dff6b14b090eb7ea426",
-    "src/client/styles.ts": "cb85967a2e8c15fcb55cbed0cae979341d960d2af9fe08d75e14b37b8dcd3587",
-    "src/client/threshold.ts": "ddc00be0f043357c2cfe1015dfdf487c3ee69a740ec0e520297dbdd36d60ee84",
-    "src/client/types.ts": "c9fb17c1eae49a409179cf137c6b7261b99e574052e3d3a9c0ad4ba986fef7e0",
-    "src/count.ts": "6bb55c6e2396ca33d6609fd0e233e3db6c0dd3aabb5da6f331b7a731d34dd0b0",
-    "src/index.ts": "a106b710c82e2935ade0935d3fe0ae2a7b3c73e133863e520f21363321105c79",
+    "src/client/styles.ts": "77a88c45938af237fa7863ea0dc6e991d7c92edc39177647bf4f27e6b27759a8",
+    "src/client/summary.ts": "85dda2de7d24ab9e67f82eeb48014a6baf5f5857397a1266490aa302779fcc9f",
+    "src/client/types.ts": "3cbd2facffa6e214abc46d58cf9bf1a09a79c96195edcdcd678e5f8bac7718dd",
+    "src/client/use-counts.ts": "c23b3db1dbca4fac45bf752849a43827fdcea786fdaced367751f350b98f168f",
+    "src/config.ts": "d579e866cfc416855ce56a732f8d076767c7146243dafb025214e945ea4ae812",
+    "src/count.ts": "3df7448b1196101fd9d5d2102f53f91f8a5848b24691bf0ee2d2641d072cd10c",
+    "src/index.ts": "6f6b8907a811db156f5eba49aed00b9f838e9bc0f71f4246fe45264cf9b477ee",
     "scripts/build.mjs": "831d6c918acc668df0e3e3c7b7f81c0e5cf90159587f8b82fea5a0f8c9c53564"
   }
 }
